@@ -4,6 +4,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import userSystem.business.abstracts.UserService;
+import userSystem.core.GoogleAuthService;
+import userSystem.core.GoogleVerificationService;
 import userSystem.core.LoggerService;
 import userSystem.dataAccess.abstracts.UserDao;
 import userSystem.entities.User;
@@ -12,10 +14,14 @@ public class UserManager implements UserService{
 	
 	private UserDao userDao;
 	private LoggerService loggerService;
+	private GoogleAuthService authService;
+	private GoogleVerificationService verificationService;
 
-	public UserManager(UserDao userDao,LoggerService loggerService) {
+	public UserManager(UserDao userDao,LoggerService loggerService,GoogleAuthService authService,GoogleVerificationService verificationService) {
 		this.userDao = userDao;	
 		this.loggerService = loggerService;
+		this.authService = authService;
+		this.verificationService = verificationService;
 	}
 
 	@Override
@@ -23,12 +29,16 @@ public class UserManager implements UserService{
 		if (checkPasswordLength(user.getPassword()) && 
 				isEmailValid(user.getEmail())) {
 			userDao.add(user);
-			loggerService.logToSystem("Doğrulama linki için mail adresinizi kontrol ediniz");
-			
 		} else {
-			loggerService.logToSystem("Kayıt işlemi gerçekleştirilemedi!");
+			loggerService.logToSystem("Registration failed!");
+			return;
 		}
 		
+		if(!verificationService.verification(user.getEmail())) {
+			loggerService.logToSystem("Mail address could not verified! :(");
+		} else {
+			loggerService.logToSystem("Verification is successfull");
+		}
 	}
 
 	@Override
@@ -38,11 +48,11 @@ public class UserManager implements UserService{
 		if(user.getEmail().trim().equals("") || user.getPassword().equals("")) {
 			return;
 		}
-		if (userInDb.getEmail().equals(user.getEmail()) && 
-				userInDb.getPassword().equals(user.getPassword())) {
-			loggerService.logToSystem("Başarılı ile giriş yapıldı.");
+		
+		if (authService.authenticateGoogleMailAccount(user.getEmail(), user.getPassword())) {
+				loggerService.logToSystem("Successfully entered.");
 		} else {
-			loggerService.logToSystem("Girilen email veya şifre hatalı!");
+			loggerService.logToSystem("Entered email or password is incorrect!");
 		}
 	}
 	
@@ -51,7 +61,7 @@ public class UserManager implements UserService{
 	public boolean checkPasswordLength(String password) {
 		
 		if(password.length() < 6 ) {
-			System.out.println("Parola en az 6 karakterden oluşmalıdır!");
+			System.out.println("Password must include min 6 characters!");
 			return false;
 		}
 		return true;
@@ -74,16 +84,9 @@ public class UserManager implements UserService{
 	public boolean checkNameLength(String fname, String lname) {
 		
 		if(fname.length() >= 2 && lname.length() >= 2) {
-			System.out.println("Ad ve soyad en az 2 karakterden oluşmalıdır!");
+			System.out.println("Name and surname must include at least 2 characters!");
 			return true;
 		}
 		return false;
 	}
-
-	@Override
-	public void sendVerificationLink() {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

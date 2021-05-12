@@ -1,17 +1,11 @@
 package userSystem.googleAuth;
 
-import userSystem.core.LoggerService;
+import userSystem.database.concrets.UserDatabase;
 import userSystem.entities.User;
 
 public class GoogleAuthManager {
 	
-	private LoggerService loggerService;
-	
-	public GoogleAuthManager(LoggerService loggerService) {
-		this.loggerService = loggerService;
-	}
-	
-	public void signUpGoogle(User user) {
-		loggerService.logToSystem("Welcome, "+user.getFirstName());
+	public boolean authenticateGoogleMailAccount(String email, String password) {
+		return false;
 	}
 }

@@ -2,7 +2,9 @@ package userSystem.dataAccess.concretes;
 
 import java.util.List;
 
+import userSystem.core.JLoggerManagerAdapter;
 import userSystem.dataAccess.abstracts.UserDao;
+import userSystem.database.concrets.UserDatabase;
 import userSystem.entities.User;
 
 public class HibernateUserDao implements UserDao{
@@ -24,13 +26,22 @@ public class HibernateUserDao implements UserDao{
 
 	@Override
 	public User getOne(long id) {
-		
+		for(User user : UserDatabase.getUserList()) {
+			if (user.getId() == id) {
+				return user;
+			}
+		}
 		return null;
 	}
 
 	@Override
 	public List<User> getAll() {
-		
+		try {
+			return UserDatabase.getUserList();
+		}catch(Exception e) {
+			JLoggerManagerAdapter logger = new JLoggerManagerAdapter();
+			logger.logToSystem("HibernateUserDao failed -> "+ e.getMessage());
+		}
 		return null;
 	}
 

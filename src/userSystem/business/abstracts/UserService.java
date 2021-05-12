@@ -8,5 +8,4 @@ public interface UserService {
 	boolean checkPasswordLength(String password);
 	boolean isEmailValid(String email);
 	boolean checkNameLength(String fname, String lname);
-	void sendVerificationLink();
 }
